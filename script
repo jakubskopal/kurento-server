@@ -1,0 +1,51 @@
+adduser jakubs
+cp -R .ssh ~jakubs/.ssh
+chown -R jakubs.jakubs ~jakubs/.ssh
+usermod -aG sudo jakubs
+
+git config --global user.email "j@kubs.cz"
+git config --global user.name "Jakub Skopal"
+
+echo "deb http://ubuntu.kurento.org xenial kms6" | sudo tee /etc/apt/sources.list.d/kurento.list
+wget -O - http://ubuntu.kurento.org/kurento.gpg.key | sudo apt-key add -
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get update
+
+sudo apt-get install kurento-media-server-6.0 certbot
+
+sudo certbot certonly --standalone -d kurento.do.kubs.info -d kurento.do.kubs.info
+
+cat <<"EOF" | sudo tee /etc/kurento/kurento.conf.json 
+{
+  "mediaServer" : {
+    "resources": {
+    //  //Resources usage limit for raising an exception when an object creation is attempted
+    //  "exceptionLimit": "0.8",
+    //  // Resources usage limit for restarting the server when no objects are alive
+    //  "killLimit": "0.7",
+        // Garbage collector period in seconds
+        "garbageCollectorPeriod": 240
+    },
+    "net" : {
+      "websocket": {
+        "port": 8888,
+        "secure": {
+          "port": 8433,
+          "certificate": "certificate.pem",
+          "password": ""
+        },
+        //"registrar": {
+        //  "address": "ws://localhost:9090",
+        //  "localAddress": "localhost"
+        //},
+        "path": "kurento",
+        "threads": 10
+      }
+    }
+  }
+}
+EOF
+
+sudo cat /etc/letsencrypt/live/kurento.do.kubs.info/fullchain.pem /etc/letsencrypt/live/kurento.do.kubs.info/privkey.pem | sudo tee certificate.pem
+
+
