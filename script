@@ -48,4 +48,16 @@ EOF
 
 sudo cat /etc/letsencrypt/live/kurento.do.kubs.info/fullchain.pem /etc/letsencrypt/live/kurento.do.kubs.info/privkey.pem | sudo tee certificate.pem
 
+curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
+sudo apt-get install nodejs
+
+sudo npm install -g bower http-server
+
+git clone https://github.com/Kurento/kurento-tutorial-js.git
+cd kurento-tutorial-js/kurento-magic-mirror
+sudo cat /etc/letsencrypt/live/kurento.do.kubs.info/fullchain.pem /etc/letsencrypt/live/kurento.do.kubs.info/privkey.pem > certificate.pem
+git checkout 6.6.0
+bower install
+http-server -p 8443 -S -C ../certificate.pem -K ../certificate.pem
+
 
